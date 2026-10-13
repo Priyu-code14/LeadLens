@@ -1,0 +1,9 @@
+company_name,domain,industry,employee_count,estimated_revenue,contact_name,email,location,source,notes
+Northstar Components,northstar-components.example,Manufacturing,85,12500000,Asha Raman,asha@northstar-components.example,Coimbatore India,Sample dataset,Fictional example record
+BlueOak Systems,blueoak-systems.example,Software,42,4800000,Arun Kumar,arun@blueoak-systems.example,Bengaluru India,Sample dataset,Fictional example record
+Evergreen Packaging,evergreen-packaging.example,Packaging,130,21000000,Meera Iyer,meera@evergreen-packaging.example,Chennai India,Sample dataset,Fictional example record
+Summit Industrial,summit-industrial.example,Manufacturing,0,,Karthik Raj,,Salem India,Sample dataset,Fictional incomplete record
+Harborview Analytics,harborview-analytics.example,Software,28,3200000,,hello@harborview-analytics.example,Hyderabad India,Sample dataset,Fictional example record
+MapleLine Foods,mapleline-foods.example,Food Processing,64,8900000,Nila Prakash,nila@mapleline-foods.example,Madurai India,Sample dataset,Fictional example record
+CedarWorks Tools,cedarworks-tools.example,Manufacturing,210,34500000,Vikram Das,vikram@cedarworks-tools.example,Tiruppur India,Sample dataset,Fictional example record
+BrightPath Logistics,brightpath-logistics.example,Logistics,53,7200000,Divya S,divya@brightpath-logistics.example,Coimbatore India,Sample dataset,Fictional example record

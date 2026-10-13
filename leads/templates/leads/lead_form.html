@@ -1,0 +1,25 @@
+{% extends "leads/base.html" %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block content %}
+<div class="form-shell">
+  <a class="muted-link small" href="{% url 'leads:dashboard' %}">← Back to dashboard</a>
+  <div class="eyebrow mt-4 mb-2">LEAD MANAGEMENT</div>
+  <h1 class="h2 fw-bold mb-2">{{ page_title }}</h1>
+  <p class="text-secondary mb-4">Add useful company details. The quality score updates automatically based on field completeness.</p>
+  <form method="post" class="panel">
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="row g-3">
+      {% for field in form %}
+      <div class="{% if field.name == 'notes' %}col-12{% elif field.name == 'company_name' or field.name == 'domain' or field.name == 'email' or field.name == 'estimated_revenue' %}col-12 col-md-6{% else %}col-12 col-md-6{% endif %}">
+        <label class="form-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
+        {{ field }}
+        {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+        {% for error in field.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+      </div>
+      {% endfor %}
+    </div>
+    <div class="d-flex justify-content-end gap-2 mt-4"><a class="btn btn-light border" href="{% url 'leads:dashboard' %}">Cancel</a><button class="btn btn-primary" type="submit">Save lead</button></div>
+  </form>
+</div>
+{% endblock %}

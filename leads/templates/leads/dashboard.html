@@ -1,0 +1,84 @@
+{% extends "leads/base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4">
+  <div>
+    <div class="eyebrow mb-2">SALES INTELLIGENCE / OVERVIEW</div>
+    <h1 class="display-6 fw-bold mb-2">Lead quality dashboard</h1>
+    <p class="text-secondary mb-0">Find promising leads, spot incomplete records, and export a cleaner list.</p>
+  </div>
+  <div class="d-flex flex-wrap gap-2">
+    <form method="post" action="{% url 'leads:import_sample' %}">
+      {% csrf_token %}<button class="btn btn-outline-primary" type="submit"><span class="me-1">↓</span> Load sample data</button>
+    </form>
+    <a class="btn btn-primary" href="{% url 'leads:add_lead' %}">+ Add lead</a>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-12 col-sm-6 col-xl-3"><div class="metric-card"><div class="metric-label">TOTAL LEADS</div><div class="metric-value">{{ total_count }}</div><div class="metric-note">Records in your workspace</div></div></div>
+  <div class="col-12 col-sm-6 col-xl-3"><div class="metric-card"><div class="metric-label">HIGH QUALITY</div><div class="metric-value">{{ high_count }}</div><div class="metric-note">Score of 80 or above</div></div></div>
+  <div class="col-12 col-sm-6 col-xl-3"><div class="metric-card"><div class="metric-label">NEED ATTENTION</div><div class="metric-value">{{ incomplete_count }}</div><div class="metric-note">At least one key field missing</div></div></div>
+  <div class="col-12 col-sm-6 col-xl-3"><div class="metric-card accent-card"><div class="metric-label">CURRENT VIEW</div><div class="metric-value">{{ leads|length }}</div><div class="metric-note">Leads match your filters</div></div></div>
+</div>
+
+<div class="panel mb-4">
+  <form method="get" class="row g-2 align-items-end">
+    <div class="col-12 col-lg-5">
+      <label for="q" class="form-label small fw-semibold">Search leads</label>
+      <input id="q" name="q" class="form-control" value="{{ query }}" placeholder="Company, domain, contact, email...">
+    </div>
+    <div class="col-6 col-lg-3">
+      <label for="industry" class="form-label small fw-semibold">Industry</label>
+      <select id="industry" name="industry" class="form-select">
+        <option value="">All industries</option>
+        {% for item in industry_options %}<option value="{{ item }}" {% if selected_industry == item %}selected{% endif %}>{{ item }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="col-6 col-lg-2">
+      <label for="quality" class="form-label small fw-semibold">Lead quality</label>
+      <select id="quality" name="quality" class="form-select">
+        <option value="">All scores</option>
+        <option value="high" {% if selected_quality == "high" %}selected{% endif %}>High</option>
+        <option value="medium" {% if selected_quality == "medium" %}selected{% endif %}>Medium</option>
+        <option value="low" {% if selected_quality == "low" %}selected{% endif %}>Low</option>
+      </select>
+    </div>
+    <div class="col-12 col-lg-2 d-flex gap-2">
+      <button class="btn btn-dark flex-grow-1" type="submit">Filter</button>
+      <a class="btn btn-light border" href="{% url 'leads:dashboard' %}">Reset</a>
+    </div>
+  </form>
+</div>
+
+<div class="panel p-0 overflow-hidden">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 p-3 p-lg-4 border-bottom">
+    <div><h2 class="h5 fw-bold mb-1">Company leads</h2><div class="small text-secondary">Score is a transparent completeness heuristic, not a prediction of conversion.</div></div>
+    <a class="btn btn-sm btn-outline-dark" href="{% url 'leads:export_csv' %}?{{ request.GET.urlencode }}">Export current view ↗</a>
+  </div>
+  {% if leads %}
+  <div class="table-responsive">
+    <table class="table align-middle table-hover mb-0">
+      <thead><tr><th class="ps-4">Company</th><th>Industry</th><th>Employees</th><th>Revenue estimate</th><th>Contact</th><th>Quality</th><th>Data gaps</th><th class="text-end pe-4">Actions</th></tr></thead>
+      <tbody>
+      {% for lead in leads %}
+        <tr>
+          <td class="ps-4"><div class="company-name">{{ lead.company_name }}</div><a class="small muted-link" href="{% if lead.domain %}https://{{ lead.domain }}{% else %}#{% endif %}" {% if lead.domain %}target="_blank" rel="noopener noreferrer"{% endif %}>{{ lead.domain|default:"No domain" }}</a></td>
+          <td>{{ lead.industry|default:"—" }}</td>
+          <td>{{ lead.employee_count|default:"—" }}</td>
+          <td>{% if lead.estimated_revenue != None %}${{ lead.estimated_revenue|floatformat:0 }}{% else %}—{% endif %}</td>
+          <td><div>{{ lead.contact_name|default:"—" }}</div>{% if lead.email %}<a class="small muted-link" href="mailto:{{ lead.email }}">{{ lead.email }}</a>{% endif %}</td>
+          <td><div class="score-wrap"><span class="score-number">{{ lead.quality_score }}</span><span class="score-track"><span class="score-fill {% if lead.quality_label == 'High' %}score-high{% elif lead.quality_label == 'Medium' %}score-medium{% else %}score-low{% endif %}" style="width: {{ lead.quality_score }}%"></span></span></div><span class="quality-badge quality-{{ lead.quality_label|lower }}">{{ lead.quality_label }}</span></td>
+          <td>{% if lead.missing_fields %}<span class="gap-text">{{ lead.missing_fields|join:", " }}</span>{% else %}<span class="text-success small">Complete</span>{% endif %}</td>
+          <td class="text-end pe-4 text-nowrap"><a class="action-link" href="{% url 'leads:edit_lead' lead.pk %}">Edit</a><form class="d-inline" method="post" action="{% url 'leads:delete_lead' lead.pk %}" data-confirm="Delete {{ lead.company_name }}?">{% csrf_token %}<button class="action-link danger-link" type="submit">Delete</button></form></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <div class="empty-state"><div class="empty-icon">⌕</div><h3 class="h5 fw-bold">No leads found</h3><p class="text-secondary">Load the sample dataset or adjust your search filters.</p><a class="btn btn-primary" href="{% url 'leads:add_lead' %}">Add your first lead</a></div>
+  {% endif %}
+  <div class="px-4 py-3 border-top small text-secondary">Showing {{ leads|length }} matching record{{ leads|length|pluralize }} · Demo data may be fictional.</div>
+</div>
+{% endblock %}
